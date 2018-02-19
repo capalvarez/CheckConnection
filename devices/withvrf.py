@@ -1,7 +1,7 @@
-from devices.device import Device
-from devices.devices_functions import ping_vrf, ping_parser_dot
+from devices.cisco import Cisco
+from devices.devices_functions import ping_vrf
 
 
-class WithVRF(Device):
+class WithVRF(Cisco):
     def __init__(self):
-        Device.__init__(self, ping_vrf, ping_parser_dot)
+        Cisco.__init__(self, ping_vrf)

@@ -6,10 +6,26 @@ from netmiko import ConnectHandler, NetMikoTimeoutException, NetMikoAuthenticati
 import type_selected as s
 import copy
 import time
-
+import status.statuses as status
+from exceptions.exceptions import PingFailedException
+from status.test_status import OKTestStatus
 
 lock = Lock()
 results = {}
+
+
+def connect_to_device(device, status_results):
+    try:
+        connection = ConnectHandler(**device)
+        return connection
+    except ConnectionRefusedError:
+        status_results['status'] = status.ConnectionRefusedStatus()
+    except OSError:
+        status_results['status'] = status.ExpectedFeedbackStatus
+    except NetMikoTimeoutException:
+        status_results['status'] = status.DisconnectedStatus()
+    except NetMikoAuthenticationException:
+        status_results['status'] = status.AuthenticationFailedStatus()
 
 
 def single_test(origin, config):
@@ -28,10 +44,10 @@ def single_test(origin, config):
     source_file = config['sources_path'] + '/' + origin_ip + '.txt'
 
     sources = read_sources_file(source_file)
-    status_result = {}
+    status_result = {'tests': []}
 
-    try:
-        connection = ConnectHandler(**device)
+    connection = connect_to_device(device, status_result)
+    if connection:
         if 'delay' in origin['type']:
             device['global_delay_factor'] = origin['type']['delay']
         else:
@@ -39,31 +55,26 @@ def single_test(origin, config):
 
         controller = origin['type']['controller']
 
-        for s in sources:
-            command = controller.ping(s['ip'], config['destination'], config['pings'])
+        for source in sources:
+            command = controller.ping(source['ip'], config['destination'], config['pings'])
             output = connection.send_command(command)
 
+            try:
+                hits, fails = origin['type']['controller'].parse_ping(output)
+                result = (100.0 * hits) / (hits + fails)
+                ping_results.append(OKTestStatus(result))
 
-            hits, fails = origin['type']['controller'].parse_ping(output)
-            result = (100.0 * hits) / (hits + fails)
+            except PingFailedException as e:
+                ping_results.append(e.get_status())
 
-
-            ping_results.append(result)
+        analyze_results(status_result, ping_results, sources)
 
         connection.disconnect()
 
-        status_result = analyze_results(ping_results, sources)
-    except ConnectionRefusedError:
-        status_result['status'] = 'CONNECTION REFUSED'
-    except NetMikoTimeoutException:
-        status_result['status'] = 'DISCONNECTED'
-    except NetMikoAuthenticationException:
-        status_result['status'] = 'AUTHENTICATION FAILED'
-    finally:
-        status_result['machine'] = origin['machine']
-        lock.acquire()
-        results[origin['facultad']].append(status_result)
-        lock.release()
+    status_result['machine'] = origin['machine']
+    lock.acquire()
+    results[origin['facultad']].append(status_result)
+    lock.release()
 
 
 class TestRunner:

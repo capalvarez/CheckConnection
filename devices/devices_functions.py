@@ -1,4 +1,5 @@
 import re
+from exceptions.exceptions import PingFailedException
 
 
 def ping_a_caller(source, destination, pings):
@@ -33,6 +34,8 @@ def ping_parser_dot(output):
         fails = total_packets.count('.')
 
         return hits, fails
+    else:
+        raise PingFailedException
 
 
 def ping_parser_list(output):
@@ -56,7 +59,6 @@ def ping_parser_list(output):
 
         return hits_packets, (total_packets - hits_packets)
     else:
-        #Tirar error, mostrar advertencia aca?
-        pass
+        raise PingFailedException
 
 
