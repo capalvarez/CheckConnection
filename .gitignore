@@ -1,0 +1,8 @@
+ScriptRedes/
+venv/
+.idea/
+files/
+__pycache__/
+analyzer/__pycache__/
+devices/__pycache__/
+file_reader/__pycache__/
