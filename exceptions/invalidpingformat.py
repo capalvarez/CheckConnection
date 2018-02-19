@@ -1,0 +1,2 @@
+class InvalidPingFormat(Exception):
+    pass
