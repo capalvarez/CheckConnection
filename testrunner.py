@@ -48,16 +48,11 @@ def single_test(origin, config):
 
     connection = connect_to_device(device, status_result)
     if connection:
-        if 'delay' in origin['type']:
-            device['global_delay_factor'] = origin['type']['delay']
-        else:
-            device['global_delay_factor'] = 1
-
         controller = origin['type']['controller']
 
         for source in sources:
             command = controller.ping(source['ip'], config['destination'], config['pings'])
-            output = connection.send_command(command)
+            output = connection.send_command_expect(command)
 
             try:
                 hits, fails = origin['type']['controller'].parse_ping(output)

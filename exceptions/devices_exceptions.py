@@ -1,0 +1,2 @@
+class DeviceTypeUnknown(Exception):
+    pass

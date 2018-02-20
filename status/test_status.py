@@ -51,3 +51,8 @@ class FailedTestStatus(TestStatus):
     def write_test(self, ip, file):
         file.write('\t' + ip['name'] + ' ' + ip['ip'] + ' ' + str(self.hits) +
                    '% TESTS SUCCESSFUL \n')
+
+
+class PingFailed(TestStatus):
+    def write_test(self, ip, file):
+        file.write('\t Ping failed with unknown error ' + ip['name'] + ' ' + ip['ip'] + '\n')

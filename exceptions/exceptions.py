@@ -1,4 +1,4 @@
-from status.test_status import InvalidIPAddressStatus, IncorrectPingFormatStatus, InvalidIPSourceStatus
+from status.test_status import InvalidIPAddressStatus, IncorrectPingFormatStatus, InvalidIPSourceStatus, PingFailed
 
 
 class PingFailedException(Exception):
@@ -20,3 +20,7 @@ class InvalidIPSource(PingFailedException):
     def get_status(self):
         return InvalidIPSourceStatus()
 
+
+class ProblemWithPing(PingFailedException):
+    def get_status(self):
+        return PingFailed()

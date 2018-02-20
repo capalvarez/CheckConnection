@@ -1,4 +1,5 @@
-from exceptions.exceptions import PingFailedException, IncorrectPingFormat, InvalidIPSource, InvalidIPAddress
+from exceptions.exceptions import PingFailedException, IncorrectPingFormat, InvalidIPSource, InvalidIPAddress, \
+    ProblemWithPing
 import re
 
 
@@ -17,6 +18,7 @@ class Device:
             self.check_syntax(ping_result)
             self.check_source(ping_result)
             self.check_ip(ping_result)
+            raise ProblemWithPing
 
     def check_syntax(self, output):
         pass
