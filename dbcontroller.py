@@ -1,5 +1,4 @@
 import settings as settings
-import facultades as f
 import ruamel.yaml as yaml
 
 
@@ -13,8 +12,9 @@ class DBController:
         with open(settings.lista_campus) as file:
             campus = yaml.load(file, Loader=yaml.RoundTripLoader)
 
-        with open(settings.lista_facultades) as file:
-            facultades = yaml.load(file, Loader=yaml.RoundTripLoader)
+        facultades = []
+        for c in campus.values():
+            facultades.extend(c['Facultades'])
 
         with open(settings.lista_oomm) as file:
             oomm = yaml.load(file, Loader=yaml.RoundTripLoader)
@@ -47,6 +47,9 @@ class DBController:
         hits = []
 
         for s in separated:
-            hits.extend([x for x in options if s in x])
+            hits.extend([x for x in options if s in x.split()])
 
         return list(set(hits))
+
+    def get_file_name(self, device):
+        return device.get_name() + '.txt', device.get_name()

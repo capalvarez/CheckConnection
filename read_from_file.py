@@ -2,6 +2,8 @@ from devices.devices_types import get_type
 from IPy import IP
 import re
 from default_values import default_port
+import warnings
+from exceptions.devices_exceptions import DeviceTypeUnknown, DeviceFileNotFound, SourcesFileNotFound
 
 
 def is_ip_address(value):
@@ -18,7 +20,7 @@ def is_ip_address(value):
     return False
 
 
-def read_devices(devs_type, file, facultad):
+def read_devices(devs_type, file):
     ips = []
 
     while True:
@@ -33,7 +35,6 @@ def read_devices(devs_type, file, facultad):
                     'port': port
                 },
                 'type': devs_type,
-                'facultad': facultad
             })
 
         if not is_ip_address(next_ip):
@@ -42,7 +43,12 @@ def read_devices(devs_type, file, facultad):
 
 def read_device_file(input_file, facultad):
     devices_to_test = []
-    file = open(input_file, 'r')
+
+    try:
+        file = open(input_file, 'r')
+    except FileNotFoundError:
+        warnings.warn("Device file not found for " + facultad.get_name())
+        raise DeviceFileNotFound
 
     device_type_line = file.readline().rstrip()
 
@@ -51,23 +57,27 @@ def read_device_file(input_file, facultad):
             return devices_to_test
 
         devs_type = get_type(device_type_line)
-        devices, device_type_line = read_devices(devs_type, file, facultad)
+        devices, device_type_line = read_devices(devs_type, file)
         devices_to_test.extend(devices)
 
 
 def read_sources_file(sources_file):
     sources = []
 
-    with open(sources_file, 'r') as file:
-        for line in file:
-            if line.rstrip():
-                name, ip, port = separate_source_ip_name(line.rstrip())
-                sources.append({
-                    'ip': ip,
-                    'name': name
-                })
+    try:
+        with open(sources_file, 'r') as file:
+            for line in file:
+                if line.rstrip():
+                    name, ip, port = separate_source_ip_name(line.rstrip())
+                    sources.append({
+                        'ip': ip,
+                        'name': name
+                    })
 
-    return sources
+        return sources
+    except FileNotFoundError:
+        warnings.warn("Sources file not found " + sources_file)
+        raise SourcesFileNotFound
 
 
 def separate_source_ip_name(string):

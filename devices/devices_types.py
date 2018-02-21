@@ -12,7 +12,7 @@ devices_type = {
     'hp': {'name': 'hp_procurve', 'controller': HP()},
     'dell n': {'name': 'dell_force10', 'controller': DellN()},
     'cisco - vrf': {'name': 'cisco_ios', 'controller': WithVRF()},
-    'cisco - telnet': {'name': 'cisco_ios_telnet', 'controller': Cisco(), 'delay': 2}
+    'cisco - telnet': {'name': 'cisco_ios_telnet', 'controller': Cisco()}
 }
 
 
@@ -20,4 +20,4 @@ def get_type(device_type):
     try:
         return devices_type[device_type.lower()]
     except KeyError:
-        raise DeviceTypeUnknown
+        raise DeviceTypeUnknown(device_type)

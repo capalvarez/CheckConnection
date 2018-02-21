@@ -9,66 +9,94 @@ import time
 import status.statuses as status
 from exceptions.exceptions import PingFailedException
 from status.test_status import OKTestStatus
+from exceptions.devices_exceptions import UnknownFacultadOrOOMM, DeviceFileNotFound, SourcesFileNotFound, DeviceTypeUnknown
+import warnings
+
 
 lock = Lock()
 results = {}
 
 
-def connect_to_device(device, status_results):
+class CorrectTest:
+    def __init__(self, origin, config):
+        self.origin = origin
+        self.config = config
+
+    def run_test(self, status_result):
+        device = {
+            'device_type': self.origin['type']['name'],
+            'ip': self.origin['machine']['ip'],
+            'username': self.config['user'],
+            'password': self.config['pswd'],
+            'port': self.origin['machine']['port'],
+            'verbose': True
+        }
+
+        ping_results = []
+
+        origin_ip = self.origin['machine']['ip'].replace('.', '-')
+        source_file = self.config['sources_path'] + '/' + origin_ip + '.txt'
+
+        status_result['machine'] = self.origin['machine']
+        sources = obtain_test_ips(source_file, status_result)
+
+        if sources:
+            connection = connect_to_device(device, status_result)
+            if connection:
+                controller = self.origin['type']['controller']
+
+                for source in sources:
+                    command = controller.ping(source['ip'], self.config['destination'], self.config['pings'])
+                    output = connection.send_command_expect(command)
+
+                    try:
+                        hits, fails = self.origin['type']['controller'].parse_ping(output)
+                        result = (100.0 * hits) / (hits + fails)
+                        ping_results.append(OKTestStatus(result))
+                    except PingFailedException as e:
+                        ping_results.append(e.get_status())
+
+                analyze_results(status_result, ping_results, sources)
+                connection.disconnect()
+
+
+class FailedTest:
+    def __init__(self, status):
+        self.status = status
+
+    def run_test(self, status_result):
+        status_result['status'] = self.status
+
+
+def connect_to_device(device, status_result):
     try:
         connection = ConnectHandler(**device)
         return connection
     except ConnectionRefusedError:
-        status_results['status'] = status.ConnectionRefusedStatus()
+        status_result['status'] = status.ConnectionRefusedStatus()
     except OSError:
-        status_results['status'] = status.ExpectedFeedbackStatus
+        status_result['status'] = status.ExpectedFeedbackStatus
     except NetMikoTimeoutException:
-        status_results['status'] = status.DisconnectedStatus()
+        status_result['status'] = status.DisconnectedStatus()
     except NetMikoAuthenticationException:
-        status_results['status'] = status.AuthenticationFailedStatus()
+        status_result['status'] = status.AuthenticationFailedStatus()
+    except UnicodeDecodeError:
+        status_result['status'] = status.ConnectionFailedStatus()
 
 
-def single_test(origin, config):
-    device = {
-        'device_type': origin['type']['name'],
-        'ip': origin['machine']['ip'],
-        'username': config['user'],
-        'password': config['pswd'],
-        'port': origin['machine']['port'],
-        'verbose': True
-    }
+def obtain_test_ips(source_file, status_result):
+    try:
+        return read_sources_file(source_file)
+    except SourcesFileNotFound:
+        status_result['status'] = status.SourcesFileNotFoundStatus()
 
-    ping_results = []
 
-    origin_ip = origin['machine']['ip'].replace('.', '-')
-    source_file = config['sources_path'] + '/' + origin_ip + '.txt'
+def single_test(test, facultad):
+    status_result = {'tests': [], 'machine': {}}
+    test.run_test(status_result)
 
-    sources = read_sources_file(source_file)
-    status_result = {'tests': []}
-
-    connection = connect_to_device(device, status_result)
-    if connection:
-        controller = origin['type']['controller']
-
-        for source in sources:
-            command = controller.ping(source['ip'], config['destination'], config['pings'])
-            output = connection.send_command_expect(command)
-
-            try:
-                hits, fails = origin['type']['controller'].parse_ping(output)
-                result = (100.0 * hits) / (hits + fails)
-                ping_results.append(OKTestStatus(result))
-
-            except PingFailedException as e:
-                ping_results.append(e.get_status())
-
-        analyze_results(status_result, ping_results, sources)
-
-        connection.disconnect()
-
-    status_result['machine'] = origin['machine']
     lock.acquire()
-    results[origin['facultad']].append(status_result)
+    results[facultad].append(status_result)
     lock.release()
 
 
@@ -105,14 +133,24 @@ class TestRunner:
 
         for s in self.selected.get_all():
             results[str(s)] = []
-            file_name, sources_path = s.get_file_name()
-            file_path = s.get_base_path() + file_name
+            try:
+                file_name, sources_path = self.controller.get_file_name(s)
+                file_path = s.get_base_path() + file_name
 
-            this_config = copy.deepcopy(config)
+                this_config = copy.deepcopy(config)
 
-            this_config['sources_path'] = s.get_complete_sources_path(sources_path)
-            list_facultad = read_device_file(file_path, str(s))
-            to_check.extend([[t, this_config] for t in list_facultad])
+                this_config['sources_path'] = s.get_complete_sources_path(sources_path)
+                list_facultad = read_device_file(file_path, s)
+                to_check.extend([(CorrectTest(t, this_config), str(s)) for t in list_facultad])
+            except UnknownFacultadOrOOMM:
+                warnings.warn("Facultad o OOMM no esta en la lista de conocidos")
+                to_check.append((FailedTest(status.UnknownDeviceStatus(s.get_name())), str(s)))
+            except DeviceFileNotFound:
+                warnings.warn("Facultad o OOMM no tiene archivo asociado")
+                to_check.append((FailedTest(status.DeviceFileNotFoundStatus(s.get_name())), str(s)))
+            except DeviceTypeUnknown as e:
+                warnings.warn("Tipo de dispositivo no conocido")
+                to_check.append((FailedTest(status.DeviceTypeUnknownStatus(e.get_unknown_type())), str(s)))
 
         pool = ThreadPool(config['threads'])
         pool.starmap(single_test, to_check)

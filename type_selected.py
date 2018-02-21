@@ -1,14 +1,11 @@
-import facultades as f
 from settings import base_sources_path, base_files_path
+from exceptions.devices_exceptions import UnknownFacultadOrOOMM
 
 
 class NameTypePair:
     def __init__(self, name, ty):
         self.name = name
         self.type = ty
-
-    def get_file_name(self):
-        pass
 
     def get_complete_sources_path(self, relative_source):
         return base_sources_path + self.type + '/' + relative_source
@@ -22,21 +19,22 @@ class NameTypePair:
     def get_name(self):
         return self.name
 
+    def get_file(self, resources):
+        pass
+
 
 class FacultadesPair(NameTypePair):
     def __init__(self, name):
         NameTypePair.__init__(self, name, 'facultad')
 
-    def get_file_name(self):
-        return f.facultades_map[self.name.lower()]
+    def get_file(self, resources):
+        if 'Archivo' in resources[self.type][self.name]:
+            pass
 
 
 class OOMMPair(NameTypePair):
     def __init__(self, name):
         NameTypePair.__init__(self, name, 'oomm')
-
-    def get_file_name(self):
-        return f.oomm_map[self.name.lower()]
 
 
 class TypeSelected:
