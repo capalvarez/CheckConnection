@@ -1,59 +1,57 @@
 class Status:
-    def write_on_file(self, device, file, status):
-        file.write(device['name'] + ' ' + device['ip'] + ' ' + status + '\n')
+    def __init__(self, status):
+        self.status = status
 
     def write_status(self, device, file):
-        pass
+        file.write(device['name'] + ' ' + device['ip'] + ' ' + self.status + '\n')
+
+    def print_status(self, hide):
+        return self.status
 
 
 class OKStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'OK!')
+    def __init__(self):
+        Status.__init__(self, 'OK!')
+
+    def print_status(self, hide):
+        if not hide:
+            return self.status
 
 
 class FailedStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'FAILED')
+    def __init__(self):
+        Status.__init__(self, 'FAILED')
 
 
 class ConnectionRefusedStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'CONNECTION REFUSED')
+    def __init__(self):
+        Status.__init__(self, 'CONNECTION REFUSED')
 
 
 class DisconnectedStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'DEVICE DISCONNECTED')
+    def __init__(self):
+        Status.__init__(self, 'DEVICE DISCONNECTED')
 
 
 class AuthenticationFailedStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, ' AUTHENTICATION FAILED')
+    def __init__(self):
+        Status.__init__(self, 'AUTHENTICATION FAILED')
 
 
 class ExpectedFeedbackStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'COMMAND EXPECTED FEEDBACK. TIMEOUT.')
-
-
-class UnknownDeviceStatus(Status):
-    def __init__(self, name):
-        self.name = name
-
-    def write_status(self, device, file):
-        file.write(self.name + ': FACULTAD U OOMM NO ENCONTRADO \n')
+    def __init__(self):
+        Status.__init__(self, 'COMMAND EXPECTED FEEDBACK. TIMEOUT.')
 
 
 class DeviceTypeUnknownStatus(Status):
     def __init__(self, device_type):
+        Status.__init__(self, 'DEVICE TYPE NOT IN LIST')
         self.type = device_type
-
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'DEVICE TYPE NOT IN LIST')
 
 
 class DeviceFileNotFoundStatus(Status):
     def __init__(self, name):
+        Status.__init__(self, 'NO TIENE ARCHIVO DE DISPOSITIVOS ASOCIADO')
         self.name = name
 
     def write_status(self, device, file):
@@ -61,10 +59,10 @@ class DeviceFileNotFoundStatus(Status):
 
 
 class SourcesFileNotFoundStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'SOURCES FILE NOT FOUND')
+    def __init__(self):
+        Status.__init__(self, 'SOURCES FILE NOT FOUND')
 
 
 class ConnectionFailedStatus(Status):
-    def write_status(self, device, file):
-        self.write_on_file(device, file, 'CONNECTION FAILED')
+    def __init__(self):
+        Status.__init__(self, 'CONNECTION FAILED')

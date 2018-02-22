@@ -9,7 +9,7 @@ import time
 import status.statuses as status
 from exceptions.exceptions import PingFailedException
 from status.test_status import OKTestStatus
-from exceptions.devices_exceptions import UnknownFacultadOrOOMM, DeviceFileNotFound, SourcesFileNotFound, DeviceTypeUnknown
+from exceptions.devices_exceptions import DeviceFileNotFound, SourcesFileNotFound, DeviceTypeUnknown
 import warnings
 
 
@@ -73,14 +73,23 @@ def connect_to_device(device, status_result):
         connection = ConnectHandler(**device)
         return connection
     except ConnectionRefusedError:
+        warnings.warn("Connection refused: " + status_result['machine']['name'] + ' ' + status_result['machine']['ip'])
         status_result['status'] = status.ConnectionRefusedStatus()
     except OSError:
+        warnings.warn("Command expected feedback for: " + status_result['machine']['name'] + ' ' +
+                      status_result['machine']['ip'])
         status_result['status'] = status.ExpectedFeedbackStatus
     except NetMikoTimeoutException:
+        warnings.warn("Connection timeout: " + status_result['machine']['name'] + ' ' +
+                      status_result['machine']['ip'])
         status_result['status'] = status.DisconnectedStatus()
     except NetMikoAuthenticationException:
+        warnings.warn("Authentication failed: " + status_result['machine']['name'] + ' ' +
+                      status_result['machine']['ip'])
         status_result['status'] = status.AuthenticationFailedStatus()
     except UnicodeDecodeError:
+        warnings.warn("Connection failed: " + status_result['machine']['name'] + ' ' +
+                      status_result['machine']['ip'])
         status_result['status'] = status.ConnectionFailedStatus()
 
 
@@ -142,9 +151,6 @@ class TestRunner:
                 this_config['sources_path'] = s.get_complete_sources_path(sources_path)
                 list_facultad = read_device_file(file_path, s)
                 to_check.extend([(CorrectTest(t, this_config), str(s)) for t in list_facultad])
-            except UnknownFacultadOrOOMM:
-                warnings.warn("Facultad o OOMM no esta en la lista de conocidos")
-                to_check.append((FailedTest(status.UnknownDeviceStatus(s.get_name())), str(s)))
             except DeviceFileNotFound:
                 warnings.warn("Facultad o OOMM no tiene archivo asociado")
                 to_check.append((FailedTest(status.DeviceFileNotFoundStatus(s.get_name())), str(s)))

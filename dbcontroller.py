@@ -52,4 +52,4 @@ class DBController:
         return list(set(hits))
 
     def get_file_name(self, device):
-        return device.get_name() + '.txt', device.get_name()
+        return device.get_name().lower() + '.txt', device.get_name().lower()

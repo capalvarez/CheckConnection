@@ -110,9 +110,21 @@ class TestsCmd(Cmd):
         output_path = current_path + '/' + output
 
         write_results(self.current_results, output_path)
+        self.current_results = {}
 
     def do_ver_seleccionados(self, line):
         print(self.runner.get_selected())
 
     def do_borrar(self, line):
         self.runner.delete_selected()
+
+    ver_parser = argparse.ArgumentParser()
+    ver_parser.add_argument('--not_ok', action='store_true')
+
+    @with_argparser(ver_parser)
+    def do_ver_resultados(self, args):
+        for v in self.current_results.values():
+            for device in v:
+                string = device['status'].print_status(args.not_ok)
+                if string:
+                    print(device['machine']['name'] + ' ' + string)

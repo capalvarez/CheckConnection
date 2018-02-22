@@ -6,6 +6,7 @@ cryptography==2.1.4
 idna==2.6
 IPy==0.83
 netmiko==2.0.1
+paramiko==2.4.0
 pyasn1==0.4.2
 pycparser==2.18
 PyNaCl==1.2.1
@@ -14,6 +15,7 @@ pyperclip==1.6.0
 pyreadline==2.1
 pyserial==3.4
 PyYAML==3.12
+ruamel.yaml==0.15.35
 scp==0.10.2
 six==1.11.0
 textfsm==0.3.2
