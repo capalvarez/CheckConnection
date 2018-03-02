@@ -46,7 +46,8 @@ class CorrectTest:
                 controller = self.origin['type']['controller']
 
                 for source in sources:
-                    command = controller.ping(source['ip'], self.config['destination'], self.config['pings'])
+                    command = controller.ping(source['ip'], self.config['destination'], self.config['pings'],
+                                              source['vrf'])
                     output = connection.send_command_expect(command)
 
                     try:
@@ -126,6 +127,12 @@ class TestRunner:
 
     def add_oomms(self, selected):
         self.selected.add_oomms(selected)
+
+    def add_datacenter(self, selected):
+        self.selected.add_datacenter(selected)
+
+    def add_datacenters(self, selected):
+        self.selected.add_datacenters(selected)
 
     def get_selected(self):
         return str(self.selected)

@@ -2,24 +2,22 @@ import re
 from exceptions.exceptions import PingFailedException
 
 
+#HP
 def ping_a_caller(source, destination, pings):
     return 'ping ' + ' -a ' + source + ' -c ' + pings + ' ' + destination
 
 
-def ping_source_ip_caller(source, destination, pings):
-    return 'ping ' + destination + ' count ' + pings + ' source ip ' + source
+#Dell
+def ping_source_ip_caller(source, destination, pings, vrf):
+    return 'ping vrf ' + vrf + ' ' + destination + ' count ' + pings + ' source ip ' + source
 
 
-def ping_source_caller(source, destination, pings):
-    return 'ping ' + destination + ' count ' + pings + ' source ' + source
-
-
-def ping_source_repeat_caller(source, destination, pings):
-    return 'ping ' + destination + ' repeat ' + pings + ' source ' + source
-
-
-def ping_vrf(source, destination, pings):
-    return 'ping vrf datos ' + destination + ' source ' + source + ' repeat ' + pings
+#Cisco
+def ping_source_repeat_caller(source, destination, pings, vrf):
+    if vrf:
+        return 'ping vrf ' + vrf + ' ' + destination + ' repeat ' + pings + ' source ' + source
+    else:
+        return 'ping ' + destination + ' repeat ' + pings + ' source ' + source
 
 
 def ping_parser_dot(output):

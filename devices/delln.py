@@ -6,6 +6,9 @@ class DellN(Device):
     def __init__(self):
         Device.__init__(self, ping_source_repeat_caller, ping_parser_list)
 
+    def ping(self, source, destination, pings, vrf):
+        return self.ping_caller(source, destination, pings, vrf)
+
     def check_syntax(self, output):
         self.check(output, ['Invalid input detected', 'Command not found / Incomplete command'],
                    self.incorrect_command)

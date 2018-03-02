@@ -4,7 +4,7 @@ import ruamel.yaml as yaml
 
 class DBController:
     def __init__(self):
-        self.campus, self.facultades, self.oomm = self.init_variables()
+        self.campus, self.facultades, self.oomm, self.datacenter = self.init_variables()
         self.selected = []
 
     @staticmethod
@@ -19,7 +19,10 @@ class DBController:
         with open(settings.lista_oomm) as file:
             oomm = yaml.load(file, Loader=yaml.RoundTripLoader)
 
-        return campus, facultades, oomm
+        with open(settings.lista_datacenter) as file:
+            datacenter = yaml.load(file, Loader=yaml.RoundTripLoader)
+
+        return campus, facultades, oomm, datacenter
 
     def get_campus(self):
         return self.campus
@@ -29,6 +32,9 @@ class DBController:
 
     def get_oomms(self):
         return self.oomm
+
+    def get_datacenter(self):
+        return self.datacenter
 
     def get_facultades_campus(self, c):
         return self.campus[c]['Facultades']
@@ -41,6 +47,9 @@ class DBController:
 
     def parse_facultades(self, string):
         return self.parse_list(self.facultades, string)
+
+    def parse_datacenter(self, string):
+        return self.parse_list(self.datacenter, string)
 
     def parse_list(self, options, selected):
         separated = selected.split()

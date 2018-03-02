@@ -6,6 +6,9 @@ class Cisco(Device):
     def __init__(self, ping=ping_source_repeat_caller):
         Device.__init__(self, ping, ping_parser_dot)
 
+    def ping(self, source, destination, pings, vrf):
+        return self.ping_caller(source, destination, pings, vrf)
+
     def check_syntax(self, output):
         self.check(output, ['Invalid input detected'], self.incorrect_command)
 

@@ -128,3 +128,26 @@ class TestsCmd(Cmd):
                 string = device['status'].print_status(args.not_ok)
                 if string:
                     print(device['machine']['name'] + ' ' + string)
+
+    def complete_seleccionar_equipos_datacenter(self, text, line, begidx, endidx):
+        if not text:
+            options = self.controller.get_datacenter()
+        else:
+            if text.startswith('-'):
+                options = ['-todos']
+            else:
+                options = [f for f in self.controller.get_datacenter() if f.lower().startswith(text.lower())]
+
+        return options
+
+    def do_listar_equipos_datacenter(self, line):
+        "Lista equipos de datacenter"
+        for f in self.controller.get_datacenter():
+            print(f)
+
+    def do_seleccionar_equipos_datacenter(self, line):
+        if line:
+            if line.startswith('-todos'):
+                self.runner.add_datacenters(self.controller.get_datacenter())
+            else:
+                self.runner.add_datacenters(self.controller.parse_datacenter(line))

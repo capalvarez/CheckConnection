@@ -6,6 +6,12 @@ class DellForce(Device):
     def __init__(self):
         Device.__init__(self, ping_source_ip_caller, ping_parser_dot)
 
+    def ping(self, source, destination, pings, vrf):
+        if not vrf:
+            vrf = 'default'
+
+        return self.ping_caller(source, destination, pings, vrf)
+
     def check_syntax(self, output):
         self.check(output, ['Error: Invalid input'], self.incorrect_command)
 
