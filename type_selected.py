@@ -65,6 +65,7 @@ class TypeSelected:
     def clear(self):
         self.facultades = set()
         self.oomm = set()
+        self.datacenter = set()
 
     def __str__(self):
         string = ''

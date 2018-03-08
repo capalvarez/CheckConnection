@@ -81,12 +81,15 @@ class TestsCmd(Cmd):
     def do_seleccionar_todo(self, line):
         self.runner.add_oomms(self.controller.get_oomms())
         self.runner.add_facultades(self.controller.get_facultades())
+        self.runner.add_datacenters(self.controller.get_datacenter())
 
     run_parser = argparse.ArgumentParser()
     run_parser.add_argument('--packets', nargs='?', default=default_values.number_pings)
     run_parser.add_argument('--threads', nargs='?', default=default_values.default_threads)
     run_parser.add_argument('--destination', nargs='?', default=default_values.default_destination)
     run_parser.add_argument('--time', action='store_true')
+    run_parser.add_argument('--repeat_failures', nargs=2, metavar=('NUMBER_REPETITIONS', 'WAIT_TIME'),
+                            default=[default_values.default_repeats, default_values.default_wait_time])
 
     @with_argparser(run_parser)
     def do_correr_prueba(self, args):
@@ -96,7 +99,12 @@ class TestsCmd(Cmd):
             'pings': args.packets,
             'threads': args.threads,
             'destination': args.destination,
-            'measure_time': args.time
+            'measure_time': args.time,
+            'repeat_failures': True if args.repeat_failures else False,
+            'repetitions_config':{
+                'repetitions': args.repeat_failures[0],
+                'wait_time': args.repeat_failures[1]
+            }
         }
 
         self.current_results = self.runner.run_selected_tests(config)

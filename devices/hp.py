@@ -6,7 +6,7 @@ class HP(Device):
     def __init__(self):
         Device.__init__(self, ping_a_caller, ping_parser_list)
 
-    def ping(self, source, destination, pings):
+    def ping(self, source, destination, pings, vrf):
         return self.ping_caller(source, destination, pings)
 
     def check_syntax(self, output):

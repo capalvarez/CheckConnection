@@ -1,6 +1,7 @@
 from exceptions.exceptions import PingFailedException, IncorrectPingFormat, InvalidIPSource, InvalidIPAddress, \
     ProblemWithPing
 import re
+from tests.switch_test import SwitchTest
 
 
 class Device:
@@ -42,3 +43,9 @@ class Device:
 
             if error_results:
                 response()
+
+    def set_extras(self, device):
+        pass
+
+    def get_correct_test(self, device, config):
+        return SwitchTest(device, config)

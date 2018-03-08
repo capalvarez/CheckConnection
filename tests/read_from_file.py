@@ -1,35 +1,19 @@
-from devices.devices_types import get_type
 import re
-from default_values import default_port, default_destination
 import warnings
-from exceptions.devices_exceptions import DeviceFileNotFound, SourcesFileNotFound
-import ruamel.yaml as yaml
+from exceptions.devices_exceptions import SourcesFileNotFound
 
 
-def read_device_file(input_file, facultad):
+def read_partition_interfaces(partition_file):
+    interfaces = []
     try:
-        with open(input_file, 'r') as file:
-            devices_to_test = yaml.load(file, Loader=yaml.RoundTripLoader)
-            devices = []
+        with open(partition_file, 'r') as file:
+            for line in file:
+                interfaces.append(line)
 
-            for k in devices_to_test.keys():
-                device = devices_to_test[k]
-                device_type = get_type(device['Tipo'])
-
-                devices.append({
-                    'machine': {
-                        'ip': device['IP'],
-                        'name': k,
-                        'port': device['Puerto'] if 'Puerto' in device else default_port
-                    },
-                    'type': device_type,
-                    'destination': device['Destino'] if 'Destino' in device else default_destination
-                })
-
-        return devices
+        return interfaces
     except FileNotFoundError:
-        warnings.warn("Device file not found for " + facultad.get_name())
-        raise DeviceFileNotFound
+        warnings.warn("Sources file not found " + partition_file)
+        raise SourcesFileNotFound
 
 
 def read_sources_file(sources_file):

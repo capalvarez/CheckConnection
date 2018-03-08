@@ -31,6 +31,3 @@ def analyze_results(results, ping_results, sources):
         results['status'] = OKStatus()
     else:
         results['status'] = FailedStatus()
-
-    return results
-

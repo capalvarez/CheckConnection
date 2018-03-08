@@ -2,22 +2,27 @@ import re
 from exceptions.exceptions import PingFailedException
 
 
-#HP
+# HP
 def ping_a_caller(source, destination, pings):
     return 'ping ' + ' -a ' + source + ' -c ' + pings + ' ' + destination
 
 
-#Dell
+# Dell
 def ping_source_ip_caller(source, destination, pings, vrf):
     return 'ping vrf ' + vrf + ' ' + destination + ' count ' + pings + ' source ip ' + source
 
 
-#Cisco
+# Cisco
 def ping_source_repeat_caller(source, destination, pings, vrf):
     if vrf:
         return 'ping vrf ' + vrf + ' ' + destination + ' repeat ' + pings + ' source ' + source
     else:
         return 'ping ' + destination + ' repeat ' + pings + ' source ' + source
+
+
+# A10
+def ping_reverse_order(source, destination, pings):
+    return 'ping source ' + source + ' repeat ' + pings + ' ' + destination
 
 
 def ping_parser_dot(output):
@@ -37,8 +42,8 @@ def ping_parser_dot(output):
 
 
 def ping_parser_list(output):
-    total = re.compile('\d+ packet\(?s\)? transmitted')
-    hits = re.compile('\d+ packet\(?s\)? received')
+    total = re.compile('\d+\s*(packet\(?s\)?)*\s*transmitted')
+    hits = re.compile('\d+\s*(packet\(?s\)?)*\s*received')
 
     match_total = total.search(output)
     match_hits = hits.search(output)

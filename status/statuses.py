@@ -8,6 +8,9 @@ class Status:
     def print_status(self, hide):
         return self.status
 
+    def needs_repeat(self):
+        return False
+
 
 class OKStatus(Status):
     def __init__(self):
@@ -66,3 +69,6 @@ class SourcesFileNotFoundStatus(Status):
 class ConnectionFailedStatus(Status):
     def __init__(self):
         Status.__init__(self, 'CONNECTION FAILED')
+
+    def needs_repeat(self):
+        return True
