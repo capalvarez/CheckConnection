@@ -1,8 +1,7 @@
 from multiprocessing.pool import ThreadPool
 from multiprocessing import Lock
-import type_selected as s
+from db import type_selected as s
 import copy
-import time
 import status.statuses as status
 from exceptions.devices_exceptions import DeviceFileNotFound, DeviceTypeUnknown
 import warnings
@@ -48,11 +47,10 @@ def read_device_file(input_file, facultad, destination):
 
 
 def single_test(test, facultad):
-    status_result = {'tests': [], 'machine': {}}
+    status_result = {'tests': [], 'machine': {}, 'facultad': facultad}
     test.run_test(status_result)
 
     lock.acquire()
-    print('Saving results for ' + facultad)
     results[facultad].append(status_result)
     lock.release()
 
@@ -127,15 +125,23 @@ class TestRunner:
             failures_repetitions = 0
             repeat_config = config['repetitions_config']
 
-            if repeat_config['repetitions'] > failures_repetitions:
-                connection_failed = list(filter(lambda x: x['status'].needs_repeat(), results.values()))
-                time.sleep(repeat_config['wait_time'])
+            while repeat_config['repetitions'] > failures_repetitions:
+                connection_failed = []
+                for r in list(results.values()):
+                    connection_failed.extend(list(filter(lambda x: x['status'].needs_repeat(), r)))
 
-                pool = ThreadPool(config['threads'])
-                pool.starmap(single_test, connection_failed)
+                if connection_failed:
+                    time.sleep(repeat_config['wait_time'])
 
-                pool.close()
-                pool.join()
+                    to_test = []
+                    to_test.extend([(t['test_instance'], t['facultad']) for t in connection_failed])
+
+                    pool = ThreadPool(config['threads'])
+                    pool.starmap(single_test, to_test)
+
+                    pool.close()
+                    pool.join()
+                failures_repetitions += 1
 
         if config['measure_time']:
             print('Tiempo total de prueba: ' + str(end_time - start_time))

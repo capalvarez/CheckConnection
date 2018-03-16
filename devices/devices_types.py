@@ -12,7 +12,8 @@ devices_type = {
     'hp': {'name': 'hp_procurve', 'controller': HP()},
     'dell n': {'name': 'dell_dnos6', 'controller': DellN()},
     'cisco - telnet': {'name': 'cisco_ios_telnet', 'controller': Cisco()},
-    'a10': {'name': 'a10', 'controller': A10()}
+    'a10': {'name': 'a10', 'controller': A10()},
+    'dell - telnet': {'name': 'dell_powerconnect_telnet', 'controller': DellForce()}
 }
 
 

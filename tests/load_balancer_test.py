@@ -24,7 +24,7 @@ class LoadBalancerTest(CorrectTest):
 
         return sources
 
-    def run_single_test(self, source, connection):
+    def run_single_test(self, source, connection, status_result):
         cmd = 'active-partition ' + source['partition']
         prompt = re.escape('['+source['partition']+']#')
         original_prompt = re.escape(connection.base_prompt)

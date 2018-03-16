@@ -34,7 +34,7 @@ class CorrectTest(Test):
                     connection.enable()
 
                     for source in sources:
-                        output = self.run_single_test(source, connection)
+                        output = self.run_single_test(source, connection, status_result)
                         source_results = []
 
                         for o in output:
@@ -48,18 +48,18 @@ class CorrectTest(Test):
                         source['results'] = source_results
                     self.analyze_results(status_result, sources)
 
-                    print('Finished '+  status_result['machine']['name'])
                     connection.exit_enable_mode()
                     connection.disconnect()
         except (paramiko.SSHException, EOFError):
                 warnings.warn("Could not connect to: " + status_result['machine']['name'] + ' ' +
                               status_result['machine']['ip'])
                 status_result['status'] = status.ConnectionFailedStatus()
+                status_result['test_instance'] = self
 
     def obtain_sources(self, status_result):
         pass
 
-    def run_single_test(self, source, connection):
+    def run_single_test(self, source, connection, status_result):
         pass
 
     def analyze_results(self, results, sources):
@@ -88,10 +88,6 @@ class CorrectTest(Test):
         except ConnectionRefusedError:
             warnings.warn("Connection refused: " + status_result['machine']['name'] + ' ' + status_result['machine']['ip'])
             status_result['status'] = status.ConnectionRefusedStatus()
-        except OSError:
-            warnings.warn("Command expected feedback for: " + status_result['machine']['name'] + ' ' +
-                          status_result['machine']['ip'])
-            status_result['status'] = status.ExpectedFeedbackStatus
         except NetMikoTimeoutException:
             warnings.warn("Connection timeout: " + status_result['machine']['name'] + ' ' +
                           status_result['machine']['ip'])
@@ -104,6 +100,7 @@ class CorrectTest(Test):
             warnings.warn("Connection failed: " + status_result['machine']['name'] + ' ' +
                           status_result['machine']['ip'])
             status_result['status'] = status.ConnectionFailedStatus()
+            status_result['test_instance'] = self
 
 
 

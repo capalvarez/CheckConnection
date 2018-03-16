@@ -1,7 +1,7 @@
 from cmd2 import Cmd, with_argparser
 import argparse
 import default_values
-from dbcontroller import DBController
+from db.dbcontroller import DBController
 from testrunner import TestRunner
 from analyzer.analyze_test_results import write_results
 from settings import current_path
@@ -31,6 +31,11 @@ class TestsCmd(Cmd):
     def do_listar_oomm(self, lines):
         "Lista de organismos menores"
         for f in self.controller.get_oomms():
+            print(f)
+
+    def do_listar_equipos_datacenter(self, lines):
+        "Lista de equipos de datacenter"
+        for f in self.controller.get_datacenter():
             print(f)
 
     def complete_seleccionar_campus(self, text, line, begidx, endidx):
@@ -101,9 +106,9 @@ class TestsCmd(Cmd):
             'destination': args.destination,
             'measure_time': args.time,
             'repeat_failures': True if args.repeat_failures else False,
-            'repetitions_config':{
-                'repetitions': args.repeat_failures[0],
-                'wait_time': args.repeat_failures[1]
+            'repetitions_config': {
+                'repetitions': int(args.repeat_failures[0]),
+                'wait_time': int(args.repeat_failures[1])
             }
         }
 
@@ -147,11 +152,6 @@ class TestsCmd(Cmd):
                 options = [f for f in self.controller.get_datacenter() if f.lower().startswith(text.lower())]
 
         return options
-
-    def do_listar_equipos_datacenter(self, line):
-        "Lista equipos de datacenter"
-        for f in self.controller.get_datacenter():
-            print(f)
 
     def do_seleccionar_equipos_datacenter(self, line):
         if line:

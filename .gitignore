@@ -7,3 +7,4 @@ analyzer/__pycache__/
 devices/__pycache__/
 file_reader/__pycache__/
 output.txt
+examples/

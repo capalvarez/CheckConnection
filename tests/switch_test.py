@@ -2,6 +2,7 @@ from tests.correct_test import CorrectTest
 from exceptions.devices_exceptions import SourcesFileNotFound
 import status.statuses as status
 from tests.read_from_file import read_sources_file
+import warnings
 
 
 class SwitchTest(CorrectTest):
@@ -17,11 +18,17 @@ class SwitchTest(CorrectTest):
         except SourcesFileNotFound:
             status_result['status'] = status.SourcesFileNotFoundStatus()
 
-    def run_single_test(self, source, connection):
-        command = self.origin['type']['controller'].ping(source['ip'], self.origin['destination'],
-                                                         self.config['pings'], source['vrf'])
-        output = connection.send_command_expect(command)
-        return [output]
+    def run_single_test(self, source, connection, status_result):
+        try:
+            command = self.origin['type']['controller'].ping(source['ip'], self.origin['destination'],
+                                                             self.config['pings'], source['vrf'])
+            # print(command)
+            output = connection.send_command_expect(command)
+            return [output]
+        except OSError:
+            warnings.warn("Command expected feedback for: " + status_result['machine']['name'] + ' ' +
+                          status_result['machine']['ip'])
+            status_result['status'] = status.ExpectedFeedbackStatus
 
     def get_test_format(self, source):
         return [dict(ip=source['ip'], name=source['name'],
