@@ -20,7 +20,7 @@ class CorrectTest(Test):
                 'ip': self.origin['machine']['ip'],
                 'username': self.config['user'],
                 'password': self.config['pswd'],
-                'secret': self.config['pswd'],
+                'secret': self.config['enable_pswd'],
                 'port': self.origin['machine']['port'],
                 'verbose': True
             }

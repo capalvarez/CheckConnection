@@ -10,12 +10,13 @@ from settings import current_path
 class TestsCmd(Cmd):
     prompt = 'tests>'
 
-    def __init__(self, user, pswd):
+    def __init__(self, user, pswd, enable_pswd):
         Cmd.__init__(self)
         self.controller = DBController()
         self.runner = TestRunner(self.controller)
         self.user = user
         self.pswd = pswd
+        self.enable_pswd = enable_pswd if enable_pswd else pswd
         self.current_results = {}
 
     def do_listar_campus(self, line):
@@ -101,6 +102,7 @@ class TestsCmd(Cmd):
         config = {
             'user': self.user,
             'pswd': self.pswd,
+            'enable_pswd': self.enable_pswd,
             'pings': args.packets,
             'threads': args.threads,
             'destination': args.destination,
