@@ -17,7 +17,7 @@ pyparsing==2.2.0
 pyperclip==1.6.0
 pyreadline==2.1
 pyserial==3.4
-PyYAML==3.12
+PyYAML==5.4
 requests==2.18.4
 ruamel.yaml==0.15.35
 scp==0.10.2
