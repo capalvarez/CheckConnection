@@ -23,4 +23,4 @@ ruamel.yaml==0.15.35
 scp==0.10.2
 six==1.11.0
 textfsm==0.3.2
-urllib3==1.22
+urllib3==1.26.5
